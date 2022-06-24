@@ -2,6 +2,7 @@ package com.breakthrough.springsecuritydemo.security;
 
 import com.breakthrough.springsecuritydemo.exceptions.JwtAuthenticationException;
 import io.jsonwebtoken.*;
+import lombok.SneakyThrows;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -51,17 +52,18 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public boolean validateToken(String token) throws JwtAuthenticationException {
-        Jws<Claims> claimsJws = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+    @SneakyThrows
+    public boolean validateToken(String token) {
         try {
+            Jws<Claims> claimsJws = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return !claimsJws.getBody().getExpiration().before(new Date());
         } catch (JwtException | IllegalArgumentException e) {
-            throw new JwtAuthenticationException("Token is expired or invalid", HttpStatus.UNAUTHORIZED);
+            throw new JwtAuthenticationException("JWT token is expired or invalid", HttpStatus.UNAUTHORIZED);
         }
     }
 
     public Authentication getAuthentication(String token) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(getUsername(token));
+        UserDetails userDetails = this.userDetailsService.loadUserByUsername(getUsername(token));
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 

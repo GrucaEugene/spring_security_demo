@@ -25,4 +25,9 @@ public class User {
     @Enumerated(value = EnumType.STRING)
     @Column(name = "status")
     private Status status;
+
+
+    public String getUsername() {
+        return getUsername();
+    }
 }
